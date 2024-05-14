@@ -7,7 +7,8 @@ import {
   useColorMode,
   FormControl,
   FormLabel,
-  Select
+  Select,
+  useToast
 } from "@chakra-ui/react";
 import { produce } from "immer";
 import { useEffect, useMemo, useState } from "react";
@@ -18,6 +19,7 @@ import {
   Padding,
   PaddingAdjustment,
   applyPadding,
+  applyPaddingOfSize,
   convolve
 } from "./algebra";
 
@@ -198,6 +200,7 @@ function useApplyDarkMode() {
 
 export function Dashboard() {
   useApplyDarkMode();
+  const toast = useToast();
 
   let matrixState = useMatrixFormState();
   let filterState = useMatrixFormState();
@@ -211,17 +214,30 @@ export function Dashboard() {
     let matrix = formStateToMatrix(matrixState);
     let filter = formStateToMatrix(filterState);
 
+    if (matrix.rows < filter.rows || matrix.cols < filter.cols) {
+      toast({
+        title: 'Invalid size.',
+        description: "Matrix is smaller than the filter.",
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+      return;
+    }
+
     matrix = applyPadding(matrix, filter.size(), padding, paddingAdj);
     let result = convolve(matrix, filter);
     setResult(result);
 
     // let matrix = formStateToMatrix(matrixState);
-    // matrix = applyPadding(matrix, Padding.Zero, {
-    //   rowsStart: 0,
-    //   rowsEnd: 2,
-    //   colsStart: 2,
-    //   colsEnd: 1
+    // matrix = applyPaddingOfSize(matrix, padding, {
+    //   rowsStart: 2,
+    //   rowsEnd: 1,
+    //   colsStart: 1,
+    //   colsEnd: 2
     // });
+
+    // setResult(matrix);
   }
 
   return (

@@ -74,6 +74,14 @@ function fillSubMatrix(
   }
 }
 
+function clamp(x: number, min: number, max: number) {
+  if (x < min) return min;
+
+  if (x > max) return max;
+
+  return x;
+}
+
 interface PadSize {
   rowsStart: number;
   rowsEnd: number;
@@ -81,12 +89,10 @@ interface PadSize {
   colsEnd: number;
 }
 
-function applyPaddingOfSize(
+export function applyPaddingOfSize(
   matrix: Matrix,
   padding: Padding,
   size: PadSize
-  // filterSize: MatrixSize,
-  // adj: PaddingAdjustment
 ) {
   let { rowsStart, rowsEnd, colsStart, colsEnd } = size;
 
@@ -105,14 +111,25 @@ function applyPaddingOfSize(
     (row, col) => matrix.getEntry(row - rowsStart, col - colsStart)
   );
 
-  let padMaker = () => 0;
+  let padValueMaker =
+    padding === Padding.Zero
+      ? () => 0
+      : (row: number, col: number) => {
+          row -= rowsStart;
+          col -= colsStart;
+
+          row = clamp(row, 0, matrix.rows - 1);
+          col = clamp(col, 0, matrix.cols - 1);
+
+          return matrix.getEntry(row, col);
+        };
 
   // prettier-ignore
   {
-    fillSubMatrix(padded, 0, rowsStart, 0, padded.cols, padMaker);
-    fillSubMatrix(padded, matrix.rows + rowsStart, rowsEnd, 0, padded.cols, padMaker);
-    fillSubMatrix(padded, 0, padded.rows, 0, colsStart, padMaker);
-    fillSubMatrix(padded, 0, padded.rows, matrix.cols + colsStart, colsEnd, padMaker);
+    fillSubMatrix(padded, 0, rowsStart, 0, padded.cols, padValueMaker);
+    fillSubMatrix(padded, matrix.rows + rowsStart, rowsEnd, 0, padded.cols, padValueMaker);
+    fillSubMatrix(padded, 0, padded.rows, 0, colsStart, padValueMaker);
+    fillSubMatrix(padded, 0, padded.rows, matrix.cols + colsStart, colsEnd, padValueMaker);
   }
 
   return padded;

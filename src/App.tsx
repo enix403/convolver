@@ -18,7 +18,8 @@ const theme = extendTheme({
   styles: {
     global: (props: StyleFunctionProps) => ({
       body: {
-        fontFamily: ""
+        fontFamily: "",
+        fontWeight: 500
       }
     })
   }
