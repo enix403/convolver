@@ -1,3 +1,4 @@
+import { flushSync } from "react-dom";
 import {
   useNumberInput,
   HStack,
@@ -15,8 +16,9 @@ import {
   Textarea
 } from "@chakra-ui/react";
 import { produce } from "immer";
-import { useEffect, useMemo, useState } from "react";
-import { repeatNode } from "~/utils/control";
+import { useEffect, useState } from "react";
+
+import { repeatNode } from "./utils";
 import {
   Matrix,
   Padding,
@@ -24,8 +26,8 @@ import {
   applyPadding,
   convolve
 } from "./algebra";
-import { flushSync } from "react-dom";
 
+// The maximum allowed dimension of a matrix (rows or columns)
 let MAX_DIM = 20;
 
 function DimensionInput({ value, onChange }) {
