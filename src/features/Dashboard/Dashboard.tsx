@@ -78,21 +78,6 @@ function useMatrixFormState() {
     return grid;
   });
 
-  /* useEffect(() => {
-    setValues(
-      produce(draft => {
-        for (let row = dim.rows; row < MAX_DIM; ++row)
-          for (let col = 0; col < MAX_DIM; ++col)
-            //
-            draft[row][col] = "0";
-        for (let col = dim.cols; col < MAX_DIM; ++col)
-          for (let row = 0; row < MAX_DIM; ++row)
-            //
-            draft[row][col] = "0";
-      })
-    );
-  }, [dim.rows, dim.cols]); */
-
   return {
     numRows,
     setNumRows,
@@ -234,7 +219,7 @@ function MatrixForm({
           <p className='mt-6'>Number of columns</p>
           <DimensionInput value={numCols} onChange={setNumCols} />
 
-          <div className='max-w-none overflow-x-auto pb-6'>
+          <div className='max-w-none overflow-x-auto pb-6 !font-bold'>
             <div
               className='mt-6 inline-grid gap-2'
               style={{
@@ -246,6 +231,7 @@ function MatrixForm({
                 return (
                   <Input
                     key={`${row},${col}`}
+                    size="lg"
                     flexShrink={0}
                     minWidth='70px'
                     width='70px'
@@ -334,16 +320,6 @@ export function Dashboard() {
     matrix = applyPadding(matrix, filter.size(), padding, paddingAdj);
     let result = convolve(matrix, filter);
     setResult(result);
-
-    // let matrix = formStateToMatrix(matrixState);
-    // matrix = applyPaddingOfSize(matrix, padding, {
-    //   rowsStart: 2,
-    //   rowsEnd: 1,
-    //   colsStart: 1,
-    //   colsEnd: 2
-    // });
-
-    // setResult(matrix);
   }
 
   return (
