@@ -8,7 +8,11 @@ import {
   FormControl,
   FormLabel,
   Select,
-  useToast
+  useToast,
+  RadioGroup,
+  Stack,
+  Radio,
+  Textarea
 } from "@chakra-ui/react";
 import { produce } from "immer";
 import { useEffect, useMemo, useState } from "react";
@@ -22,6 +26,7 @@ import {
   applyPaddingOfSize,
   convolve
 } from "./algebra";
+import { flushSync } from "react-dom";
 
 let MAX_DIM = 20;
 
@@ -99,6 +104,16 @@ function useMatrixFormState() {
   };
 }
 
+function toInt(value: any) {
+  let asNum = +value;
+  if (isNaN(asNum)) asNum = 0;
+  if (!isFinite(asNum)) asNum = 0;
+
+  asNum = Math.floor(asNum);
+
+  return asNum;
+}
+
 type MatrixFormState = ReturnType<typeof useMatrixFormState>;
 
 function MatrixForm({
@@ -110,6 +125,10 @@ function MatrixForm({
 }) {
   const { numRows, setNumRows, numCols, setNumCols, dim, values, setValues } =
     formState;
+
+  const [inputMode, setInputMode] = useState<"cells" | "raw">("cells");
+
+  const [rawValue, setRawValue] = useState("");
 
   function loc(index: number) {
     let row = Math.floor(index / dim.cols);
@@ -126,6 +145,44 @@ function MatrixForm({
     );
   }
 
+  function handleBlur() {
+    // console.log(rawValue);
+    let linesStr = rawValue
+      .split("\n")
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    let lines = linesStr.map(line => {
+      let lineWords = line
+        .split(" ")
+        .map(word => word.trim())
+        .filter(Boolean)
+      return lineWords;
+    });
+
+    let rawRows = Math.min(lines.length, MAX_DIM);
+    let rawCols = Math.min(
+      Math.max(...lines.map(line => line.length)),
+      MAX_DIM
+    );
+
+    flushSync(() => {
+      setNumRows(rawRows);
+      setNumCols(rawCols);
+    });
+
+    setValues(
+      produce(draft => {
+        for (let row = 0; row < rawRows; ++row) {
+          let rowData = lines[row];
+          for (let col = 0; col < rawCols; ++col) {
+            draft[row][col] = col < rowData.length ? rowData[col] : '0';
+          }
+        }
+      })
+    );
+  }
+
   return (
     <div>
       {title && (
@@ -134,50 +191,78 @@ function MatrixForm({
         </Heading>
       )}
 
-      <p>Number of rows</p>
-      <DimensionInput value={numRows} onChange={setNumRows} />
+      <RadioGroup value={inputMode} onChange={setInputMode as any} my='24px'>
+        <Stack spacing={5} align='center' direction='row'>
+          <FormLabel fontWeight='bold' m='0'>
+            Input Mode
+          </FormLabel>
+          <Radio size='lg' colorScheme='blue' value='cells'>
+            Cells
+          </Radio>
+          <Radio size='lg' colorScheme='green' value='raw'>
+            Raw Data
+          </Radio>
+        </Stack>
+      </RadioGroup>
 
-      <p className='mt-6'>Number of columns</p>
-      <DimensionInput value={numCols} onChange={setNumCols} />
+      {inputMode === "cells" ? (
+        <>
+          <p>Number of rows</p>
+          <DimensionInput value={numRows} onChange={setNumRows} />
 
-      <div className='max-w-none overflow-x-auto pb-6'>
-        <div
-          className='mt-6 inline-grid gap-2'
-          style={{
-            gridTemplateColumns: `repeat(${dim.cols},1fr)`
-          }}
-        >
-          {repeatNode(dim.cols * dim.rows, index => {
-            let { row, col } = loc(index);
-            return (
-              <Input
-                key={`${row},${col}`}
-                flexShrink={0}
-                minWidth='70px'
-                width='70px'
-                variant='outline'
-                borderColor='black'
-                borderWidth={2}
-                value={values[row][col]}
-                onChange={event => update(row, col, event.target.value)}
-              />
-            );
-          })}
-        </div>
-      </div>
+          <p className='mt-6'>Number of columns</p>
+          <DimensionInput value={numCols} onChange={setNumCols} />
+
+          <div className='max-w-none overflow-x-auto pb-6'>
+            <div
+              className='mt-6 inline-grid gap-2'
+              style={{
+                gridTemplateColumns: `repeat(${dim.cols},1fr)`
+              }}
+            >
+              {repeatNode(dim.cols * dim.rows, index => {
+                let { row, col } = loc(index);
+                return (
+                  <Input
+                    key={`${row},${col}`}
+                    flexShrink={0}
+                    minWidth='70px'
+                    width='70px'
+                    variant='outline'
+                    borderColor='black'
+                    borderWidth={2}
+                    value={values[row][col]}
+                    onChange={event => update(row, col, event.target.value)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <Textarea
+            value={rawValue}
+            h='200px'
+            className='font-mono'
+            onBlur={handleBlur}
+            onChange={event => setRawValue(event.target.value)}
+            placeholder={MATRIX_RAW_PLACEHOLDER}
+          />
+        </>
+      )}
     </div>
   );
 }
 
-function toInt(value: any) {
-  let asNum = +value;
-  if (isNaN(asNum)) asNum = 0;
-  if (!isFinite(asNum)) asNum = 0;
+const MATRIX_RAW_PLACEHOLDER = `
+Enter matrix. e.g
 
-  asNum = Math.floor(asNum);
+4 1 8
+2 9 0
+7 2 4
 
-  return asNum;
-}
+`.trim();
 
 function formStateToMatrix(state: MatrixFormState) {
   let { rows, cols } = state.dim;
@@ -216,12 +301,12 @@ export function Dashboard() {
 
     if (matrix.rows < filter.rows || matrix.cols < filter.cols) {
       toast({
-        title: 'Invalid size.',
+        title: "Invalid size.",
         description: "Matrix is smaller than the filter.",
-        status: 'error',
+        status: "error",
         duration: 4000,
-        isClosable: true,
-      })
+        isClosable: true
+      });
       return;
     }
 
