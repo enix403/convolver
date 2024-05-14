@@ -16,14 +16,12 @@ import {
 } from "@chakra-ui/react";
 import { produce } from "immer";
 import { useEffect, useMemo, useState } from "react";
-import { AppLayout } from "~/components/AppLayout/AppLayout";
 import { repeatNode } from "~/utils/control";
 import {
   Matrix,
   Padding,
   PaddingAdjustment,
   applyPadding,
-  applyPaddingOfSize,
   convolve
 } from "./algebra";
 import { flushSync } from "react-dom";
@@ -213,10 +211,10 @@ function MatrixForm({
 
       {inputMode === "cells" ? (
         <>
-          <p className="mb-2">Number of rows</p>
+          <p className='mb-2'>Number of rows</p>
           <DimensionInput value={numRows} onChange={setNumRows} />
 
-          <p className='mt-6 mb-2'>Number of columns</p>
+          <p className='mb-2 mt-6'>Number of columns</p>
           <DimensionInput value={numCols} onChange={setNumCols} />
 
           <div className='max-w-none overflow-x-auto pb-6 font-semibold'>
@@ -290,7 +288,7 @@ function useApplyDarkMode() {
   }, []);
 }
 
-export function Dashboard() {
+export function Convolver() {
   useApplyDarkMode();
   const toast = useToast();
 
@@ -323,77 +321,75 @@ export function Dashboard() {
   }
 
   return (
-    <AppLayout>
-      <div className='p-4 pb-96'>
-        <MatrixForm title='Matrix' formState={matrixState} />
+    <div className='p-4 pb-96'>
+      <MatrixForm title='Matrix' formState={matrixState} />
 
-        <hr className='my-7' />
+      <hr className='my-7' />
 
-        <MatrixForm title='Filter' formState={filterState} />
+      <MatrixForm title='Filter' formState={filterState} />
 
-        <hr className='my-7' />
+      <hr className='my-7' />
 
-        <FormControl className='md:max-w-[400px]'>
-          <FormLabel fontWeight='bold'>Padding</FormLabel>
-          <Select
-            value={padding}
-            onChange={event => setPadding(+event.target.value as any)}
-          >
-            <option value={Padding.None}>None</option>
-            <option value={Padding.Zero}>Zero</option>
-            <option value={Padding.Same}>Same</option>
-          </Select>
-        </FormControl>
-
-        <FormControl mt='16px' className='md:max-w-[400px]'>
-          <FormLabel fontWeight='bold'>Padding Adjustment</FormLabel>
-          <Select
-            value={paddingAdj}
-            onChange={event => setPaddingAdj(+event.target.value as any)}
-          >
-            <option value={PaddingAdjustment.FloorStart}>Floor Start</option>
-            <option value={PaddingAdjustment.CeilStart}>Ceil Start</option>
-          </Select>
-        </FormControl>
-
-        <Button
-          onClick={handleConvolve}
-          colorScheme='teal'
-          mt='24px'
-          className='w-48 max-md:w-full'
+      <FormControl className='md:max-w-[400px]'>
+        <FormLabel fontWeight='bold'>Padding</FormLabel>
+        <Select
+          value={padding}
+          onChange={event => setPadding(+event.target.value as any)}
         >
-          Convolve
-        </Button>
-        {result && (
-          <>
-            <hr className='my-7' />
+          <option value={Padding.None}>None</option>
+          <option value={Padding.Zero}>Zero</option>
+          <option value={Padding.Same}>Same</option>
+        </Select>
+      </FormControl>
 
-            <Heading size='lg' mb='10px'>
-              Result
-            </Heading>
+      <FormControl mt='16px' className='md:max-w-[400px]'>
+        <FormLabel fontWeight='bold'>Padding Adjustment</FormLabel>
+        <Select
+          value={paddingAdj}
+          onChange={event => setPaddingAdj(+event.target.value as any)}
+        >
+          <option value={PaddingAdjustment.FloorStart}>Floor Start</option>
+          <option value={PaddingAdjustment.CeilStart}>Ceil Start</option>
+        </Select>
+      </FormControl>
 
-            <div className='overflow-x-auto py-8'>
-              <div
-                className='inline-grid gap-1 gap-x-5 px-8 font-mono'
-                style={{
-                  gridTemplateColumns: `repeat(${result.cols},1fr)`
-                }}
-              >
-                {repeatNode(result.rows * result.cols, index => (
-                  <div
-                    key={index}
-                    className='h-8 min-w-8 rounded bg-white/10 p-0.5 px-1'
-                  >
-                    <p className='text-right text-lg font-semibold'>
-                      {result.getEntryIndexed(index)}
-                    </p>
-                  </div>
-                ))}
-              </div>
+      <Button
+        onClick={handleConvolve}
+        colorScheme='teal'
+        mt='24px'
+        className='w-48 max-md:w-full'
+      >
+        Convolve
+      </Button>
+      {result && (
+        <>
+          <hr className='my-7' />
+
+          <Heading size='lg' mb='10px'>
+            Result
+          </Heading>
+
+          <div className='overflow-x-auto py-8'>
+            <div
+              className='inline-grid gap-1 gap-x-5 px-8 font-mono'
+              style={{
+                gridTemplateColumns: `repeat(${result.cols},1fr)`
+              }}
+            >
+              {repeatNode(result.rows * result.cols, index => (
+                <div
+                  key={index}
+                  className='h-8 min-w-8 rounded bg-white/10 p-0.5 px-1'
+                >
+                  <p className='text-right text-lg font-semibold'>
+                    {result.getEntryIndexed(index)}
+                  </p>
+                </div>
+              ))}
             </div>
-          </>
-        )}
-      </div>
-    </AppLayout>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
