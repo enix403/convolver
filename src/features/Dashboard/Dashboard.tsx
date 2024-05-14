@@ -146,7 +146,6 @@ function MatrixForm({
   }
 
   function handleBlur() {
-    // console.log(rawValue);
     let linesStr = rawValue
       .split("\n")
       .map(line => line.trim())
@@ -156,7 +155,7 @@ function MatrixForm({
       let lineWords = line
         .split(" ")
         .map(word => word.trim())
-        .filter(Boolean)
+        .filter(Boolean);
       return lineWords;
     });
 
@@ -166,6 +165,27 @@ function MatrixForm({
       MAX_DIM
     );
 
+    let subValues: string[][] = [];
+    let colSizes = new Array(rawCols).fill(0);
+
+    for (let row = 0; row < rawRows; ++row) {
+      let rowData = lines[row];
+      let subValueRow: string[] = [];
+      for (let col = 0; col < rawCols; ++col) {
+        let value = col < rowData.length ? rowData[col] : "0";
+        subValueRow.push(value);
+
+        if (value.length > colSizes[col])
+          //
+          colSizes[col] = value.length;
+      }
+      subValues.push(subValueRow);
+    }
+
+    let formattedRawValue = subValues
+      .map(row => row.map((val, col) => val.padStart(colSizes[col])).join(" "))
+      .join("\n");
+
     flushSync(() => {
       setNumRows(rawRows);
       setNumCols(rawCols);
@@ -174,13 +194,14 @@ function MatrixForm({
     setValues(
       produce(draft => {
         for (let row = 0; row < rawRows; ++row) {
-          let rowData = lines[row];
           for (let col = 0; col < rawCols; ++col) {
-            draft[row][col] = col < rowData.length ? rowData[col] : '0';
+            draft[row][col] = subValues[row][col];
           }
         }
       })
     );
+
+    setRawValue(formattedRawValue);
   }
 
   return (
@@ -385,7 +406,7 @@ export function Dashboard() {
                 {repeatNode(result.rows * result.cols, index => (
                   <div
                     key={index}
-                    className='h-8 w-8 rounded bg-white/10 p-0.5'
+                    className='h-8 min-w-8 px-1 rounded bg-white/10 p-0.5'
                   >
                     <p className='text-right text-lg font-semibold'>
                       {result.getEntryIndexed(index)}
