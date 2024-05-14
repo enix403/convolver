@@ -48,7 +48,7 @@ function DimensionInput({ value, onChange }) {
   const input = getInputProps();
 
   return (
-    <HStack maxW='320px'>
+    <HStack maxW='320px' className='font-semibold'>
       <Button {...dec}>-</Button>
       <Input {...input} />
       <Button {...inc}>+</Button>
@@ -157,7 +157,7 @@ function MatrixForm({
       let rowData = lines[row];
       let subValueRow: string[] = [];
       for (let col = 0; col < rawCols; ++col) {
-        let value = col < rowData.length ? rowData[col] : "0";
+        let value = col < rowData.length ? toInt(rowData[col]).toString() : "0";
         subValueRow.push(value);
 
         if (value.length > colSizes[col])
@@ -213,13 +213,13 @@ function MatrixForm({
 
       {inputMode === "cells" ? (
         <>
-          <p>Number of rows</p>
+          <p className="mb-2">Number of rows</p>
           <DimensionInput value={numRows} onChange={setNumRows} />
 
-          <p className='mt-6'>Number of columns</p>
+          <p className='mt-6 mb-2'>Number of columns</p>
           <DimensionInput value={numCols} onChange={setNumCols} />
 
-          <div className='max-w-none overflow-x-auto pb-6 !font-bold'>
+          <div className='max-w-none overflow-x-auto pb-6 font-semibold'>
             <div
               className='mt-6 inline-grid gap-2'
               style={{
@@ -231,7 +231,7 @@ function MatrixForm({
                 return (
                   <Input
                     key={`${row},${col}`}
-                    size="lg"
+                    size='lg'
                     flexShrink={0}
                     minWidth='70px'
                     width='70px'
@@ -382,7 +382,7 @@ export function Dashboard() {
                 {repeatNode(result.rows * result.cols, index => (
                   <div
                     key={index}
-                    className='h-8 min-w-8 px-1 rounded bg-white/10 p-0.5'
+                    className='h-8 min-w-8 rounded bg-white/10 p-0.5 px-1'
                   >
                     <p className='text-right text-lg font-semibold'>
                       {result.getEntryIndexed(index)}

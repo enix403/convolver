@@ -5,44 +5,6 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
-      fontFamily: {
-        inter: 'Inter',
-        poppins: 'Poppins',
-        quicksand: 'Quicksand',
-      },
-      colors: {
-        'x-head': '#253D4E',
-        'x-mute': '#ADADAD',
-        'x-grey': {
-          1: '#7E7E7E',
-          2: '#ECECEC',
-        },
-        'x-green': {
-          1: '#3BB77E',
-          2: '#BCE3C9',
-        },
-        'x-orange': {
-          1: '#F2AE1C',
-          2: '#F8CF84'
-        },
-        'x-purple': {
-          1: '#8B86BE'
-        },
-        'x-pink': {
-          1: '#DEB0BD'
-        },
-
-        'th': {
-          'red': '#e35439',
-          'yellow': '#f1c200',
-          'green': '#62d337',
-        }
-      },
-      boxShadow: {
-        'x-1': '10px 10px 15px rgba(0, 0, 0, 0.05)'
-      },
-    },
     screens: {
       ph: '520px',
       sm: '640px',
